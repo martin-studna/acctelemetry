@@ -2,4 +2,4 @@ bokeh==3.1
 pandas==2
 matplotlib==3.7
 scipy==1.10
-pymongo==4.3
+pymongo

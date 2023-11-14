@@ -1,3 +1,4 @@
+import io
 import os, glob, copy
 
 import numpy as np
@@ -594,6 +595,23 @@ def scanFiles(files):
                          ))
     return data
 
+def scanFile(f):
+    data = []
+    if not os.path.isfile(os.path.splitext(f)[0]+".ldx"): 
+        return None
+    head = ldparser.ldHead.fromfile(open(f,'rb'))
+    laps_ = laps_times(np.array(laps(f)))
+    for i, lap in enumerate(laps_):
+        if lap==0: 
+            continue
+        data.append((os.path.basename(f),
+                        head.datetime,
+                        head.venue, head.event.name, i,
+                        "%i:%02i.%03i"%(lap//60, lap%60, (lap*1e3)%1000),
+                        head.driver,
+                        ))
+    return data
+
 
 def get_laps_meta(db, track=None, playerName=None, playerSurname=None, match=None):
     group = {'_id': {
@@ -706,6 +724,67 @@ def scanDB(db):
             "%i:%02i.%03i"%(l['laptime'][i]//60, l['laptime'][i]%60, (l['laptime'][i]*1e3) % 1000),
             l['driver'][i]) for i in range(len(l['sid']))]
 
+
+
+
+def getData2(ld_file, ldx_file):
+    
+    data = []
+
+    head = ldparser.ldHead.fromfile(ld_file)
+    
+    laps = []
+    tree = ET.parse(ldx_file)
+    root = tree.getroot()
+
+    # read lap times
+    for lap in root[0][0][0][0]:
+        laps.append(float(lap.attrib['Time'])*1e-6)
+    
+    
+    for i, lap in enumerate(laps):
+        if lap==0: 
+            continue
+        data.append(("data",
+                        head.datetime,
+                        head.venue, head.event.name, i,
+                        "%i:%02i.%03i"%(lap//60, lap%60, (lap*1e3)%1000),
+                        head.driver,
+                        ))
+        
+    data = np.array(sorted(data, key=lambda x: (x[1], x[6], x[4]), reverse=True))
+    data = dict(
+        name=data[:, 0],
+        datetime=[d.strftime("%Y-%m-%d %H:%M:%S") for d in data[:, 1]],
+        track=data[:, 2],
+        car=data[:, 3],
+        lap=data[:, 4],
+        time=data[:, 5],
+        driver=data[:, 6]
+    )
+    return data
+        
+    
+
+
+
+
+def getData(file):
+    
+    data = scanFile(file)
+    data = np.array(sorted(data, key=lambda x: (x[1], x[6], x[4]), reverse=True))
+    data = dict(
+        name=data[:, 0],
+        datetime=[d.strftime("%Y-%m-%d %H:%M:%S") for d in data[:, 1]],
+        track=data[:, 2],
+        car=data[:, 3],
+        lap=data[:, 4],
+        time=data[:, 5],
+        driver=data[:, 6]
+    )
+    return data
+    
+    
 
 def updateTableData(source, filter_source, track_select, car_select):
     data = scanFiles(glob.glob(os.path.join(os.environ['TELEMETRY_FOLDER'].strip("'"), '*.ld')))

@@ -43,11 +43,11 @@ def callback():
         else:
             f_ = os.path.join(os.environ['TELEMETRY_FOLDER'].strip("'"), filter_source.data['name'][idx])
             head_, chans = ldparser.read_ldfile(f_)
-
             laps = np.array(acctelemetry.laps(f_))
+
             ds = acctelemetry.LDDataStore(
                 chans, laps,
-                acc=head_.event!='AC_LIVE'
+                acc=head_.event != 'AC_LIVE'
             )
 
         # create pandas DataFrame

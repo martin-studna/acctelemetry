@@ -608,6 +608,7 @@ def getLapControls(ds, slider):
 
 
 def getTrackMap(target, reference=None, mode='speed', view='lapsdelta'):
+
     if reference is None:
         df_, df_r = target, None
     else:

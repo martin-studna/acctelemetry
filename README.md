@@ -15,7 +15,7 @@ After cloning the repo, also checkout the submodules with `git submodule update 
 
 ## Usage
 ```bash
-export TELEMETRY_FOLDER=='/../Documents/Assetto Corsa Competizione/MoTeC'
+export TELEMETRY_FOLDER='/../Documents/Assetto Corsa Competizione/MoTeC'
 bokeh serve --show .
 ```
 
